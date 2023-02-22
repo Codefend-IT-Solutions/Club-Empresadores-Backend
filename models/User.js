@@ -37,6 +37,28 @@ const userSchema = new mongoose.Schema(
       maxlength: [1024, "Password cannot excede 1024 characters"],
       select: false,
     },
+    profileImage: {
+      type: String,
+    },
+    web: {
+      type: String,
+    },
+    socials: [
+      {
+        instagram: {
+          type: String,
+        },
+        linkedIn: {
+          type: String,
+        },
+        twitter: {
+          type: String,
+        },
+        facebook: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

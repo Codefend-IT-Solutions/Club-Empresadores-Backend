@@ -152,3 +152,165 @@ module.exports.userLogin = async (req, res) => {
     return res.status(500).json({ errors: error });
   }
 };
+
+/**
+ * @description Add User Profile Image
+ * @route PUT /api/user/profile-image
+ * @access Private
+ */
+module.exports.addProfileImage = async (req, res) => {
+  const { _id } = req.user;
+  const { profileImage } = req.body;
+
+  //Edge Case
+  if (profileImage === "") {
+    return res
+      .status(400)
+      .json({ errors: [{ msg: "Image is required", status: false }] });
+  }
+
+  try {
+    await userModel.updateOne({ _id }, { profileImage });
+
+    //Response
+    return res.status(200).json({
+      msg: "Profile Image Updated Successfully",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Get User Info
+ * @route GET /api/user/whoami
+ * @access Private
+ */
+module.exports.userInfo = async (req, res) => {
+  const { _id } = req.user;
+
+  try {
+    const user = await userModel.findOne({ _id });
+    if (!user) {
+      return res.status(400).json({
+        errors: [{ msg: "User not found", status: false }],
+      });
+    }
+
+    //Response
+    return res.status(200).json({
+      user,
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Edit User Profile
+ * @route PUT /api/user/edit-profile
+ * @access Private
+ */
+module.exports.editProfile = async (req, res) => {
+  const { _id } = req.user;
+  const { ...payload } = req.body;
+  const data = { ...payload };
+
+  //Preparing Input
+  const input = {
+    name: data.name,
+    address: data.address,
+    phoneNumber: data.phoneNumber,
+    profession: data.profession,
+    web: data.web,
+    socials: [
+      {
+        instagram: data.instagram,
+        linkedIn: data.linkedIn,
+        twitter: data.twitter,
+        facebook: data.facebook,
+      },
+    ],
+  };
+
+  //Logic
+  try {
+    await userModel.updateOne({ _id }, { ...input }, { new: true });
+
+    //Response
+    return res.status(200).json({
+      msg: "Profile Updated Successfully",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Change Password
+ * @route PUT /api/user/change-password
+ * @access Private
+ */
+module.exports.changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const { _id } = req.user;
+
+  if (currentPassword.length === 0) {
+    return res.status(400).json({
+      errors: [{ msg: "Password must be atleast 8 characters", status: false }],
+    });
+  }
+  if (newPassword.length === 0) {
+    return res.status(400).json({
+      errors: [{ msg: "Password must be atleast 8 characters", status: false }],
+    });
+  }
+
+  //Change Password Logic
+  try {
+    const user = await userModel.findOne({ _id }).select("+password");
+    if (user) {
+      const matched = await bcrypt.compare(currentPassword, user.password);
+      if (matched) {
+        //Preparing the hash password
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(newPassword, salt);
+
+        await userModel.updateOne({ _id }, { password: hash });
+        return res
+          .status(200)
+          .json({ msg: "Password updated succesfully", status: true });
+      } else {
+        return res.status(400).json({
+          errors: [{ msg: "Invalid Current Password", status: false }],
+        });
+      }
+    } else {
+      return res.status(400).json({
+        errors: [{ msg: "User not found", status: false }],
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Delete User Account
+ * @route DELETE /api/user/delete-account
+ * @access Private
+ */
+module.exports.deleteAccount = async (req, res) => {
+  const { _id } = req.user;
+  try {
+    await userModel.deleteOne({ _id });
+    return res
+      .status(200)
+      .json({ msg: "Account deleted succesfully", status: true });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
