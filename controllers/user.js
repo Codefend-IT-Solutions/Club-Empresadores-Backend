@@ -4,6 +4,11 @@ const userModel = require("../models/User");
 //Utility Functions
 const generateToken = require("../utils/generateToken");
 
+//Helpers
+const {
+  Types: { ObjectId },
+} = require("mongoose");
+
 //NPM Packages
 const bcrypt = require("bcryptjs");
 
@@ -311,6 +316,50 @@ module.exports.deleteAccount = async (req, res) => {
       .status(200)
       .json({ msg: "Account deleted succesfully", status: true });
   } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Get All Users
+ * @route GET /api/user/get-all-users
+ * @access Public
+ */
+module.exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await userModel.find({});
+    if (users.length === 0) {
+      return res.status(400).json({
+        errors: [{ msg: "Users not found", status: false }],
+      });
+    }
+
+    //Response
+    return res.status(200).json({ users, status: true });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Get Specific User
+ * @route GET /api/user/get-specific-user
+ * @access Public
+ */
+module.exports.getSpecificUser = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await userModel.findOne({ _id: ObjectId(id) });
+    if (!user) {
+      return res.status(400).json({
+        errors: [{ msg: "User not found", status: false }],
+      });
+    }
+
+    //Response
+    return res.status(200).json({ user, status: true });
+  } catch (error) {
+    console.log(error);
     return res.status(500).json({ errors: error });
   }
 };

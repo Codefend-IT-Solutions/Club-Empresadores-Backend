@@ -9,6 +9,8 @@ const {
   editProfile,
   changePassword,
   deleteAccount,
+  getAllUsers,
+  getSpecificUser,
 } = require("../controllers/user");
 
 //Middlewares
@@ -23,5 +25,8 @@ router.route("/whoami").get(verifyUser, userInfo);
 router.route("/edit-profile").put(verifyUser, editProfile);
 router.route("/change-password").put(verifyUser, changePassword);
 router.route("/delete-account").delete(verifyUser, deleteAccount);
+
+router.route("/get-all-users").get(getAllUsers);
+router.route("/get-specific-user/:id").get(getSpecificUser);
 
 module.exports = router;
