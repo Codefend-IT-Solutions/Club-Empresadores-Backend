@@ -8,6 +8,8 @@ const {
   registerAgenda,
   getRegisteredAgendas,
   getRegisteredAgenda,
+  deleteAgenda,
+  editAgenda,
 } = require("../controllers/agenda");
 
 //Middlewares
@@ -21,5 +23,8 @@ router.route("/get-agenda/:id").get(getAgenda);
 router.route("/register-agenda").post(verifyUser, registerAgenda);
 router.route("/get-registered-agendas").get(getRegisteredAgendas);
 router.route("/get-registered-agenda/:id").get(getRegisteredAgenda);
+
+router.route("/delete/:id").delete(deleteAgenda);
+router.route("/edit/:id").put(editAgenda);
 
 module.exports = router;

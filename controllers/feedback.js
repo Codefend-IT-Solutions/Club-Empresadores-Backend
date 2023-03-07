@@ -1,6 +1,11 @@
 //Models
 const feedbackModel = require("../models/Feedback");
 
+//Helpers
+const {
+  Types: { ObjectId },
+} = require("mongoose");
+
 /**
  * @description Add Feedback
  * @route POST /api/feedback/add-feedback
@@ -53,6 +58,22 @@ module.exports.getFeedbacks = async (req, res) => {
       feedbacks,
       status: true,
     });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Delete Feedback
+ * @route DELETE /api/feeback/delete
+ * @access Public
+ */
+module.exports.deleteFeedback = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await feedbackModel.deleteOne({ _id: ObjectId(id) });
+    return res.status(200).json({ status: true });
   } catch (error) {
     return res.status(500).json({ errors: error });
   }

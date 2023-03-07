@@ -13,7 +13,18 @@ const {
  * @access Public
  */
 module.exports.addAgenda = async (req, res) => {
-  const { name, speaker, date, hour, socials, description, image } = req.body;
+  const {
+    name,
+    speaker,
+    date,
+    hour,
+    instagram,
+    linkedIn,
+    twitter,
+    facebook,
+    description,
+    image,
+  } = req.body;
 
   //Edge cases and errors
   if (name === "") {
@@ -47,18 +58,27 @@ module.exports.addAgenda = async (req, res) => {
       .json({ errors: [{ msg: "Description is required", status: false }] });
   }
 
+  //Preparing Input
+  const input = {
+    name,
+    speaker,
+    date,
+    hour,
+    image,
+    socials: [
+      {
+        instagram,
+        linkedIn,
+        twitter,
+        facebook,
+      },
+    ],
+    description,
+  };
   //Logic
   try {
     //Creating agenda
-    const agenda = await agendaModel.create({
-      name,
-      speaker,
-      date,
-      hour,
-      socials,
-      description,
-      image,
-    });
+    const agenda = await agendaModel.create({ ...input });
 
     //Response
     return res.status(200).json({
@@ -102,7 +122,7 @@ module.exports.getAgendas = async (req, res) => {
 module.exports.getAgenda = async (req, res) => {
   const { id } = req.params;
   try {
-    const agenda = await agendaModel.find({ _id: ObjectId(id) });
+    const agenda = await agendaModel.findOne({ _id: ObjectId(id) });
     if (!agenda) {
       return res
         .status(404)
@@ -186,7 +206,7 @@ module.exports.getRegisteredAgenda = async (req, res) => {
   const { id } = req.params;
   try {
     const registeredAgenda = await registerAgendaModel
-      .find({
+      .findOne({
         _id: ObjectId(id),
       })
       .populate("user agenda");
@@ -198,6 +218,79 @@ module.exports.getRegisteredAgenda = async (req, res) => {
     //Response
     return res.status(200).json({
       registeredAgenda,
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Delete Agenda
+ * @route DELETE /api/agenda/delete-agenda
+ * @access Public
+ */
+module.exports.deleteAgenda = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await agendaModel.deleteOne({ _id: ObjectId(id) });
+    return res.status(200).json({ status: true });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Edit Agenda
+ * @route PUT /api/agenda/edit
+ * @access Public
+ */
+module.exports.editAgenda = async (req, res) => {
+  const { id } = req.params;
+  const {
+    name,
+    speaker,
+    date,
+    hour,
+    image,
+    description,
+    instagram,
+    linkedIn,
+    twitter,
+    facebook,
+  } = req.body;
+
+  //Preparing Input
+  const input = {
+    name,
+    speaker,
+    date,
+    hour,
+    image,
+    socials: [
+      {
+        instagram,
+        linkedIn,
+        twitter,
+        facebook,
+      },
+    ],
+    description,
+  };
+
+  //Logic
+  try {
+    //Upadating agenda
+    await agendaModel.updateOne(
+      { _id: ObjectId(id) },
+      { ...input },
+      { new: true }
+    );
+
+    //Response
+    return res.status(200).json({
+      msg: "Agenda Updated",
       status: true,
     });
   } catch (error) {

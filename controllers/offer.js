@@ -138,3 +138,47 @@ module.exports.getUserOffers = async (req, res) => {
     return res.status(500).json({ errors: error });
   }
 };
+
+/**
+ * @description Delete Offer
+ * @route DELETE /api/offer/delete
+ * @access Public
+ */
+module.exports.deleteOffer = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await offerModel.deleteOne({ _id: ObjectId(id) });
+    return res.status(200).json({ status: true });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Edit Offer
+ * @route PUT /api/offer/edit
+ * @access Public
+ */
+module.exports.editOffer = async (req, res) => {
+  const { id } = req.params;
+  const { title, location, speaker, price, description, image } = req.body;
+
+  //Logic
+  try {
+    //Upadating agenda
+    await offerModel.updateOne(
+      { _id: ObjectId(id) },
+      { title, location, speaker, price, description, image },
+      { new: true }
+    );
+
+    //Response
+    return res.status(200).json({
+      msg: "Offer Updated",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};

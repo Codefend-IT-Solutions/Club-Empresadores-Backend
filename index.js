@@ -1,9 +1,13 @@
 //NPM Packages
 const express = require("express");
 const bodyParser = require("body-parser");
+const path = require("path");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
+
+//Make these static for image upload so browser can process them
+app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 
 //Project files and routes
 const apiRouter = require("./routes");
@@ -14,10 +18,9 @@ connect();
 
 //Utils
 app.use(bodyParser.json());
-app.use(express.static("public"));
-app.use(express.json({ limit: "50mb" }));
-app.use(express.urlencoded({ limit: "50mb", extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+app.use(express.json());
 
 //connecting routes
 app.use("/api", apiRouter);
