@@ -255,6 +255,34 @@ module.exports.editProfile = async (req, res) => {
 };
 
 /**
+ * @description Edit Specific User Profile
+ * @route PUT /api/user/edit-specefic-profile
+ * @access Private
+ */
+module.exports.editSpecificUser = async (req, res) => {
+  const { id } = req.params;
+  const { name, address, email, phoneNumber, profession, dob, image } =
+    req.body;
+
+  //Logic
+  try {
+    await userModel.updateOne(
+      { _id: ObjectId(id) },
+      { name, address, email, phoneNumber, profession, dob, image },
+      { new: true }
+    );
+
+    //Response
+    return res.status(200).json({
+      msg: "Profile Updated Successfully",
+      status: true,
+    });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
  * @description Change Password
  * @route PUT /api/user/change-password
  * @access Private
@@ -312,6 +340,23 @@ module.exports.deleteAccount = async (req, res) => {
   const { _id } = req.user;
   try {
     await userModel.deleteOne({ _id });
+    return res
+      .status(200)
+      .json({ msg: "Account deleted succesfully", status: true });
+  } catch (error) {
+    return res.status(500).json({ errors: error });
+  }
+};
+
+/**
+ * @description Delete Specific User Account
+ * @route DELETE /api/user/delete-specific-account
+ * @access Private
+ */
+module.exports.deleteSpecificAccount = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await userModel.deleteOne({ _id: ObjectId(id) });
     return res
       .status(200)
       .json({ msg: "Account deleted succesfully", status: true });
